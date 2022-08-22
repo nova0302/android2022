@@ -54,13 +54,146 @@
   - toastView.setGravity(Gravity.TOP|Gravity.LEFT, 200, 800)
   - toastView.show()
   - *SHOW()*
+    #+begin_src java
+      
+public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast toastView = Toast.makeText(getApplicationContext(), "toast message", Toast.LENGTH_LONG);
+                toastView.setGravity(Gravity.TOP|Gravity.LEFT, 200, 800 );
+                toastView.show();
+            }
+        });
+    }
+}
+    #+end_src
 * ProgressBar
   - progressbar.setProgress(value)
+    #+begin_src java
+      public class MainActivity extends AppCompatActivity {
+    ProgressBar progressBar;
+    int value = 0;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        progressBar = findViewById(R.id.progressBar);
+
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                value += 5;
+                if (value > 100){
+                    value = 0;
+                }
+                progressBar.setProgress(value);
+                println();
+            }
+        });
+    }
+    protected void println(){
+        Toast.makeText(getApplicationContext(), "Progress: " + value, Toast.LENGTH_SHORT).show();
+    }
+}
+    #+end_src
 * LayoutInflater
   - Layoutinflater inflater = (Layoutinflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)
   - inflater.inflate(R.layout.sub1, container, true)
   - Toast.makeText(this.getApplicationContext(), "partial screen added", Toast.LENGTH_SHORT).show();
 * Events
+#+begin_src java
+  public class MainActivity extends AppCompatActivity {
+    TextView textView;
+    GestureDetector detector;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        textView = findViewById(R.id.textView);
+
+        View view = findViewById(R.id.view);
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                float cX = event.getX();
+                float cY = event.getY();
+                if (action == MotionEvent.ACTION_DOWN){
+                    println("finger pressed: " + cX + ", " + cY);
+                }else if (action == MotionEvent.ACTION_MOVE){
+                    println("finger move: " + cX + ", " + cY);
+                }else if (action == MotionEvent.ACTION_UP){
+                    println("finger up: " + cX + ", " + cY);
+                }
+                return true;
+            }
+        });
+
+        detector = new GestureDetector(this, new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent motionEvent) {
+                println("onDown");
+                return true;
+            }
+            @Override
+            public void onShowPress(MotionEvent motionEvent) {
+            }
+            @Override
+            public boolean onSingleTapUp(MotionEvent motionEvent) {
+                return false;
+            }
+            @Override
+            public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+                return false;
+            }
+            @Override
+            public void onLongPress(MotionEvent motionEvent) {
+                println("onLongPress");
+            }
+            @Override
+            public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+                println("onFling" + v + ", " + v1);
+                return true;
+            }
+        });
+
+        View view2 = findViewById(R.id.view2);
+        view2.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                detector.onTouchEvent(event);
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK){
+            println("system [BACK] button pressed");
+            return true;
+        }
+        return false;
+    }
+
+    public void println(String data){
+        textView.append(data + "\n");
+    }
+}
+#+end_src
   - onConfigurationChanged
   - onTouch
    - GestureDetector
