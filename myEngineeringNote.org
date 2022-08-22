@@ -1,21 +1,60 @@
-* functions
-  - findViewById
+* View
   - view.setOnTouchListener
-  - MotionEvent
-    - event.getAction
-    - event.getX
-    - event.getY
-    - Motionevent.ACTION_DOWN
-    - Motionevent.ACTION_MOVE
-    - Motionevent.ACTION_UP
   - textView.append
+  - textView.setText(name)
+  - View.OnClickListener()
+* Button
+  - button.setOnClickListener
+  - View.OnClicklistener
+* Edit
+  - editText.getText().toString()
+* Toast
+  - Toast toastView = Toast.makeText(getApplicationContext(), "toast message", Toast.LENGTH_LONG)
+  - toastView.setGravity(Gravity.TOP|Gravity.LEFT, 200, 800)
+  - toastView.show()
+  - *SHOW()*
+* ProgressBar
+  - progressbar.setProgress(value)
+* LayoutInflater
+  - Layoutinflater inflater = (Layoutinflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)
+  - inflater.inflate(R.layout.sub1, container, true)
+  - Toast.makeText(this.getApplicationContext(), "partial screen added", Toast.LENGTH_SHORT).show();
+* Events
+  - onConfigurationChanged
   - onTouch
-  - GestureDetector
+   - GestureDetector
     - onDown
     - onShowPress
     - onSingleTapUp
     - onScroll
     - onLongPress
     - onFling
+   - MotionEvent
+    - event.getAction
+    - event.getX
+    - event.getY
+    - Motionevent.ACTION_DOWN
+    - Motionevent.ACTION_MOVE
+    - Motionevent.ACTION_UP
+   - onSavedInstanceState
+    - outState.putString("name", name)
+    - savedInsanceState.getString(key: "name")
+   
+* General
+  - findViewById
   - Toast.makeText
+
+* AndroidManifest.xml
+  - android:configChanges="orientation|screenSize|keyboardHidden"
+  - android:screenOrienation="landscape"
       
+* AlertDialog.Builder
+  - Alertdialog.Builder builder = new Alertdialog.Builder(this)
+  - builder.setTitle("Info")
+  - builder.setMessage("Quit?")
+  - builder.setIcon
+  - builder.setPositiveButton
+  - builder.setNegativeButton
+  - Alertdialog dialog = builder.create();
+  - dialog.show();
+    
