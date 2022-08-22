@@ -1,0 +1,9 @@
+* functions
+  - findViewById
+  - view.setOnTouchListener
+  - MotionEvent
+    - event.getAction
+    - event.getX
+    - event.getY
+  - textView.append
+      

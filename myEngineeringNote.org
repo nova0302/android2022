@@ -1,0 +1,21 @@
+* functions
+  - findViewById
+  - view.setOnTouchListener
+  - MotionEvent
+    - event.getAction
+    - event.getX
+    - event.getY
+    - Motionevent.ACTION_DOWN
+    - Motionevent.ACTION_MOVE
+    - Motionevent.ACTION_UP
+  - textView.append
+  - onTouch
+  - GestureDetector
+    - onDown
+    - onShowPress
+    - onSingleTapUp
+    - onScroll
+    - onLongPress
+    - onFling
+  - Toast.makeText
+      
