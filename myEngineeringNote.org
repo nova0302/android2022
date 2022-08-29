@@ -1,98 +1,320 @@
-* Android App components(4)
-- Activity
-- Service
-- Broadcast receiver
-- Content provider
 
-  
-* Activity & Intent 1
-** MainActivity
+
+* Service
+
+* Receiver
+** Java Codes
+*** MainActivity.java
 #+begin_src java
-public class MainActivity extends AppCompatActivity {
-
+public class MainActivity extends AppCompatActivity implements AutoPermissionsListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Button button = findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),MenuActivity.class);
-                startActivityForResult(intent, 101);
-            }
-        });
+        AutoPermissions.Companion.loadAllPermissions(this, 101);
     }
-
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == 101){
-            if (data != null){
-                String name = data.getStringExtra("name");
-                if (name != null){
-                    Toast.makeText(this, "Result : " + name , Toast.LENGTH_SHORT).show();
-                }
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        AutoPermissions.Companion.parsePermissions(this, requestCode, permissions, this);
+    }
+    @Override
+    public void onDenied(int i, @NonNull String[] strings) {
+        showToast("Permission Deined: " + strings.length);
+    }
+    @Override
+    public void onGranted(int i, @NonNull String[] strings) {
+        showToast("Permission Granted: " + strings.length);
+    }
+    public void showToast(String data){
+        Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
+    }
+}
+#+end_src
+*** SmsReceiver.java
+#+begin_src java
+public class SmsReceiver extends BroadcastReceiver {
+    private static final String TAG = "SmsReceiver";
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "onReceive called");
+        Bundle bundle = intent.getExtras();
+        SmsMessage[] messages = parseSmsMessage(bundle);
+        if (messages != null && messages.length > 0){
+            String sender = messages[0].getOriginatingAddress();
+            String contents = messages[0].getMessageBody();
+            Log.d(TAG, "sender: " + sender + ", contents: " + contents);
+            sendToActivity(context, sender, contents);
+        }
+    }
+    public void sendToActivity(Context context, String sender, String contents){
+        Intent intent = new Intent(context, SmsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("sender", sender);
+        intent.putExtra("contents", contents);
+        context.startActivity(intent);
+    }
+    private SmsMessage[] parseSmsMessage(Bundle bundle){
+        Object[] objs = (Object[]) bundle.get("pdus");
+        SmsMessage[] messages = new SmsMessage[objs.length];
+        int smsCount = objs.length;
+        for (int i=0; i<smsCount; i++){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                String format = bundle.getString("format");
+                messages[i] = SmsMessage.createFromPdu((byte[])objs[i], format);
+            }else{
+                messages[i] = SmsMessage.createFromPdu((byte[])objs[i]);
             }
+        }
+        return messages;
+    }
+}
+#+end_src
+*** SmsActivity.java
+#+begin_src java
+  public class SmsActivity extends AppCompatActivity {
+    TextView textView2;
+    TextView textView3;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sms);
+        textView2 = findViewById(R.id.textView2);
+        textView3 = findViewById(R.id.textView3);
+        Intent intent = getIntent();
+        processIntent(intent);
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        processIntent(intent);
+    }
+    public void processIntent(Intent intent){
+        if (intent != null){
+            String sender = intent.getStringExtra("sender");
+            String  contents = intent.getStringExtra("contents");
+            textView2.setText(sender);
+            textView3.setText(contents);
         }
     }
 }
 #+end_src
-** MenuActivity
-#+begin_src java
-public class MenuActivity extends AppCompatActivity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_menu);
 
-        Button button = findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.putExtra("name", "Peter");
-                setResult(RESULT_OK, intent);
-                finish();
-            }
-        });
+** AndroidManifest.xml
+#+begin_src xml
+  <?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.myreceiver">
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyReceiver"
+        tools:targetApi="31">
+        <activity
+            android:name=".SmsActivity"
+            android:exported="false" />
+        <receiver
+            android:name=".SmsReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+#+end_src
+
+** gradle
+*** build.gradle
+#+begin_src gradle
+  dependencies {
+    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    implementation 'com.github.pedroSG94:AutoPermissions:1.0.3' <------ add
+}
+#+end_src
+
+*** settings.gradle
+#+begin_src gradle
+  dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" } <----- add
     }
 }
 #+end_src
 
-* Activity & Intent 2
-#+begin_src java
-  
-public class MainActivity extends AppCompatActivity {
 
+* Actionbar
+** MainActivity.java
+#+begin_src java
+public class MainActivity extends AppCompatActivity {
+    ActionBar actionBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        actionBar = getSupportActionBar();
+        actionBar.setLogo(R.drawable.home);
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME|ActionBar.DISPLAY_USE_LOGO);
+    }
+    @Override
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int curId = item.getItemId();
+        switch (curId){
+            case R.id.menu_refresh:
+                showToast("selected refresh menu!");
+                break;
+            case R.id.menu_search:
+                showToast("selected search menu!");
+                break;
+            case R.id.menu_settings:
+                showToast("selected settings menu!");
+                break;
+            default:break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    public void showToast(String data){
+        Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
+    }
+}
+#+end_src
+** menu_main.xml
+#+begin_src xml
+  <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-        Button button = findViewById(R.id.button);
+    <item android:id="@+id/menu_refresh"
+        android:title="refresh"
+        android:icon="@drawable/menu_refresh"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_search"
+        android:title="search"
+        android:icon="@drawable/menu_search"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_settings"
+        android:title="settings"
+        android:icon="@drawable/menu_settings"
+        app:showAsAction="always"/>
+</menu>
+#+end_src
+
+
+* Fragment 1
+** activity_main.xml
+#+begin_src xml
+  <?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity" >
+    <fragment
+        android:id="@+id/mainFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.example.myfragment02.MainFragment"/>
+</FrameLayout>
+#+end_src
+
+** MainActivity.java
+#+begin_src java
+
+ 
+  public class MainActivity extends AppCompatActivity {
+      MainFragment mainFragment;
+      MenuFragment menuFragment;
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+	  super.onCreate(savedInstanceState);
+	  setContentView(R.layout.activity_main);
+	  mainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.mainFragment);
+	  menuFragment = new MenuFragment();
+      }
+      public void onFragmentChanged(int index){
+	  if (index == 0){
+	      getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+	  }else if (index == 1){
+	      getSupportFragmentManager().beginTransaction().replace(R.id.container, menuFragment).commit();
+	  }
+      }
+  } 
+#+end_src
+
+** MainFragment.java
+#+begin_src java
+public class MainFragment extends Fragment {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_main, container, false);
+
+        Button button = rootView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("tel:010-8631-3221"));
-                startActivity(intent);
+                MainActivity activity = (MainActivity)getActivity();
+                activity.onFragmentChanged(1);
             }
         });
-
-        Button button2 = findViewById(R.id.button2);
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://google.com"));
-                startActivity(intent);
-            }
-        });
+        return  rootView;
     }
 }
 #+end_src
 
+** MenuFragment.java
+#+begin_src java
+  public class MenuFragment extends Fragment {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ViewGroup rootView =(ViewGroup) inflater.inflate(R.layout.fragment_menu, container, false);
+
+        Button button = rootView.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity activity = (MainActivity) getActivity();
+                activity.onFragmentChanged(0);
+            }
+        });
+        return rootView;
+    }
+}
+#+end_src
+  
   
 
 * Activity
@@ -119,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
       }
   }
 #+end_src
+
 * Intent
 #+begin_src java
   Button button = findViewById(R.id.button);
@@ -130,6 +353,7 @@ public class MainActivity extends AppCompatActivity {
 	  }
       });
 #+end_src
+
 * View
 - view.setOnTouchListener
 - textView.append
@@ -166,154 +390,7 @@ public class MainActivity extends AppCompatActivity {
 	}
     }
   #+end_src
-* ProgressBar
-- progressbar.setProgress(value)
-  #+begin_src java
-    public class MainActivity extends AppCompatActivity {
-	ProgressBar progressBar;
-	int value = 0;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-	    super.onCreate(savedInstanceState);
-	    setContentView(R.layout.activity_main);
-
-	    progressBar = findViewById(R.id.progressBar);
-
-	    Button button = findViewById(R.id.button);
-	    button.setOnClickListener(new View.OnClickListener() {
-		    @Override
-		    public void onClick(View view) {
-			value += 5;
-			if (value > 100){
-			    value = 0;
-			}
-			progressBar.setProgress(value);
-			println();
-		    }
-		});
-	}
-	protected void println(){
-	    Toast.makeText(getApplicationContext(), "Progress: " + value, Toast.LENGTH_SHORT).show();
-	}
-    }
-  #+end_src
-
-* LayoutInflater
-- Layoutinflater inflater = (Layoutinflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)
-- inflater.inflate(R.layout.sub1, container, true)
-- Toast.makeText(this.getApplicationContext(), "partial screen added", Toast.LENGTH_SHORT).show();
-
-  #+begin_src java
-
-    public class MenuActivity extends AppCompatActivity {
-	LinearLayout container;
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-	    super.onCreate(savedInstanceState);
-	    setContentView(R.layout.activity_menu);
-
-	    container = findViewById(R.id.container);
-
-	    Button button = findViewById(R.id.button2);
-	    button.setOnClickListener(new View.OnClickListener() {
-		    @Override
-		    public void onClick(View view) {
-			addLayout();
-		    }
-		});
-	}
-	public void addLayout(){
-	    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	    inflater.inflate(R.layout.sub1, container, true);
-	    Toast.makeText(this, "partial view is added!", Toast.LENGTH_SHORT).show();
-	}
-    }
-  #+end_src
-* Events
-#+begin_src java
-  public class MainActivity extends AppCompatActivity {
-    TextView textView;
-    GestureDetector detector;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        textView = findViewById(R.id.textView);
-
-        View view = findViewById(R.id.view);
-        view.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                float cX = event.getX();
-                float cY = event.getY();
-                if (action == MotionEvent.ACTION_DOWN){
-                    println("finger pressed: " + cX + ", " + cY);
-                }else if (action == MotionEvent.ACTION_MOVE){
-                    println("finger move: " + cX + ", " + cY);
-                }else if (action == MotionEvent.ACTION_UP){
-                    println("finger up: " + cX + ", " + cY);
-                }
-                return true;
-            }
-        });
-
-        detector = new GestureDetector(this, new GestureDetector.OnGestureListener() {
-            @Override
-            public boolean onDown(MotionEvent motionEvent) {
-                println("onDown");
-                return true;
-            }
-            @Override
-            public void onShowPress(MotionEvent motionEvent) {
-            }
-            @Override
-            public boolean onSingleTapUp(MotionEvent motionEvent) {
-                return false;
-            }
-            @Override
-            public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-                return false;
-            }
-            @Override
-            public void onLongPress(MotionEvent motionEvent) {
-                println("onLongPress");
-            }
-            @Override
-            public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-                println("onFling" + v + ", " + v1);
-                return true;
-            }
-        });
-
-        View view2 = findViewById(R.id.view2);
-        view2.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                detector.onTouchEvent(event);
-                return false;
-            }
-        });
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK){
-            println("system [BACK] button pressed");
-            return true;
-        }
-        return false;
-    }
-
-    public void println(String data){
-        textView.append(data + "\n");
-    }
-}
-#+end_src
   - onConfigurationChanged
   - onTouch
    - GestureDetector
@@ -352,3 +429,27 @@ public class MainActivity extends AppCompatActivity {
   - Alertdialog dialog = builder.create();
   - dialog.show();
     
+* Activity vs Framgment
+https://charlezz.medium.com/activity-vs-fragment-%EB%AC%B4%EC%97%87%EC%9D%84-%EC%84%A0%ED%83%9D%ED%95%B4%EC%95%BC-%ED%95%A0%EA%B9%8C-56ce7fa2bfc4
+https://stackoverflow.com/questions/10478233/why-fragments-and-when-to-use-fragments-instead-of-activities
+https://www.geeksforgeeks.org/difference-between-a-fragment-and-an-activity-in-android/
+
+* misc
+** style.xml -> themes.xml
+https://hyunjungchoi.tistory.com/76
+
+** Drawer Activity Error
+   - Duplicate class androidx.lifecycle.ViewModelLazy found in modules lifecycle-viewmodel-2.5.0-runtime (androidx.lifecycle:lifecycle-viewmodel:2.5.0) and lifecycle-viewmodel-ktx-2.3.1-runtime (androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1)
+   - https://stackoverflow.com/questions/69817925/problem-duplicate-class-androidx-lifecycle-viewmodel-found-in-modules
+   - implementation "androidx.lifecycle:lifecycle-viewmodel:2.5.1"
+   - implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+
+** java reflection
+  - https://codechacha.com/ko/reflection/
+    
+** Receiver(App Permission) Related Errors
+  - Your project has set `android.useAndroidX=true`, but configuration `:app:debugRuntimeClasspath` still contains legacy support libraries, which may cause runtime issues.
+  - 해결 방법: 안드로이드 스튜디오: Gradle Scripts > gradle.properties > android.enableJetifier=true 추가 > Sync Now 클릭
+  - 출처: https://webit22.tistory.com/73 [조약돌_마을:티스토리]
+  - https://ideajini.tistory.com/15
+
