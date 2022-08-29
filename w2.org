@@ -35,38 +35,109 @@ public class MainActivity extends AppCompatActivity {
 }
 #+end_src
 
-** LayoutInflater
-- Layoutinflater inflater = (Layoutinflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)
-- inflater.inflate(R.layout.sub1, container, true)
-- Toast.makeText(this.getApplicationContext(), "partial screen added", Toast.LENGTH_SHORT).show();
+** ScrollView
+*** strings.xml
+#+begin_src xml
+  <resources>
+    <string name="app_name">MyScrollView</string>
+    <string name="try_message">남은 도전횟수는 %d입니다.\n</string>
+</resources>
+#+end_src
 
-  #+begin_src java
+*** MainActivity.java
+#+begin_src java
 
-    public class MenuActivity extends AppCompatActivity {
-	LinearLayout container;
+   public class MainActivity extends AppCompatActivity {
+       int index = 0;
+       TextView textView;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-	    super.onCreate(savedInstanceState);
-	    setContentView(R.layout.activity_menu);
+       @Override
+       protected void onCreate(Bundle savedInstanceState) {
+	   super.onCreate(savedInstanceState);
+	   setContentView(R.layout.activity_main);
 
-	    container = findViewById(R.id.container);
+	   textView = findViewById(R.id.textView);
 
-	    Button button = findViewById(R.id.button2);
-	    button.setOnClickListener(new View.OnClickListener() {
-		    @Override
-		    public void onClick(View view) {
-			addLayout();
-		    }
-		});
-	}
-	public void addLayout(){
-	    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	    inflater.inflate(R.layout.sub1, container, true);
-	    Toast.makeText(this, "partial view is added!", Toast.LENGTH_SHORT).show();
-	}
+	   Button button = findViewById(R.id.button);
+	   button.setOnClickListener(new View.OnClickListener() {
+	       @Override
+	       public void onClick(View view) {
+		   addText();
+	       }
+	   });
+       }
+       public void addText(){
+           if (index % 10 == 0){
+	     textView.setText("");
+	   }
+	   if(index % 2 == 0){
+	       String msg = index + " Hello world!\n";
+	       textView.append(msg);
+	   }else{
+	       //Resources res = getResources();
+	       //String text = String.format(res.getString(R.string.try_message), index);
+	       String text = String.format(getString(R.string.try_message), index);
+	       textView.append(text);
+	   }
+	   index++;
+       }
+   }
+
+#+end_src
+
+** Orientation
+#+begin_src java
+public class MainActivity extends AppCompatActivity {
+    String name;
+    EditText editText;
+    EditText editText2;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        showToast("onCreate!");
+
+        editText = findViewById(R.id.editText);
+        editText2 = findViewById(R.id.editText2);
+
+        Button button = findViewById(R.id.button);
+        if (button != null){
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (editText != null){
+                        name = editText.getText().toString();
+                        showToast("user input assigned to name variable");
+                    }
+                }
+            });
+        }
+        if (savedInstanceState != null){
+            if (editText2 != null){
+                name = savedInstanceState.getString("name");
+                editText2.setText(name);
+                showToast("the value is restored:" + name);
+            }
+        }
     }
-  #+end_src
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("name", name);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        showToast("onDestroy!");
+    }
+
+    public void showToast(String data){
+        Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
+    }
+}
+#+end_src
 
 ** Events
 #+begin_src java
@@ -132,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 detector.onTouchEvent(event);
-                return false;
+                return true;
             }
         });
     }
@@ -151,4 +222,89 @@ public class MainActivity extends AppCompatActivity {
     }
 }
 #+end_src
+
+** SnackBar
+#+begin_src java
+  public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Button button= findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "snackbar!", Snackbar.LENGTH_LONG).show();
+            }
+        });
+
+        Button button2 = findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showMessage();
+            }
+        });
+    }
+
+    public void showMessage(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("info");
+        builder.setMessage("quit?");
+        builder.setIcon(android.R.drawable.ic_dialog_alert);
+        builder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Toast.makeText(getApplicationContext(), "yes button pressed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("no", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Toast.makeText(getApplicationContext(), "no button pressed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+}
+#+end_src
+
+
+** LayoutInflater
+- Layoutinflater inflater = (Layoutinflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)
+- inflater.inflate(R.layout.sub1, container, true)
+- Toast.makeText(this.getApplicationContext(), "partial screen added", Toast.LENGTH_SHORT).show();
+
+  #+begin_src java
+
+    public class MenuActivity extends AppCompatActivity {
+	LinearLayout container;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+	    super.onCreate(savedInstanceState);
+	    setContentView(R.layout.activity_menu);
+
+	    container = findViewById(R.id.container);
+
+	    Button button = findViewById(R.id.button2);
+	    button.setOnClickListener(new View.OnClickListener() {
+		    @Override
+		    public void onClick(View view) {
+			addLayout();
+		    }
+		});
+	}
+	public void addLayout(){
+	    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	    inflater.inflate(R.layout.sub1, container, true);
+	    Toast.makeText(this, "partial view is added!", Toast.LENGTH_SHORT).show();
+	}
+    }
+  #+end_src
+
 
