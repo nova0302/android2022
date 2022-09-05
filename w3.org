@@ -129,4 +129,4 @@ public class MyService extends Service {
 
 #+CAPTION: Application Screen Shot
 #+NAME:   fig:SED-HR4049
-./images/service01.png
+[[./images/service01.png]]
