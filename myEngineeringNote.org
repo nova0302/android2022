@@ -233,6 +233,13 @@ public class MainActivity extends AppCompatActivity {
 
 
 * Fragment 1
+** main methods
+  - getSupportFragmentManager.beginTransaction.replace.commit
+  - getSupportFragmentManager.findFragmentById
+  - rootView.findViewById
+  - getActivity
+
+
 ** activity_main.xml
 #+begin_src xml
   <?xml version="1.0" encoding="utf-8"?>
@@ -315,6 +322,176 @@ public class MainFragment extends Fragment {
 }
 #+end_src
   
+* Fragment2
+** 1. MainActivity.java
+#+begin_src java
+public class MainActivity extends AppCompatActivity implements ImageSelectionCallback {
+    ListFragment listFragment;
+    ViewerFragment viewerFragment;
+    int[]images = {R.drawable.dream01, R.drawable.dream02, R.drawable.dream03};
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        FragmentManager manager = getSupportFragmentManager();
+        listFragment =(ListFragment) manager.findFragmentById(R.id.listFragment);
+        viewerFragment = (ViewerFragment) manager.findFragmentById(R.id.viewerFragment);
+    }
+
+    @Override
+    public void onImageSelected(int position) {
+        viewerFragment.setImage(images[position]);
+    }
+}
+#+end_src
+** 2. ListFragment.java
+#+begin_src java
+  
+public class ListFragment extends Fragment {
+    ImageSelectionCallback callback;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.fragment_list, container, false);
+
+        Button button = rootView.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (callback != null){
+                    callback.onImageSelected(0);
+                }
+            }
+        });
+
+        Button button2 = rootView.findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (callback != null){
+                    callback.onImageSelected(1);
+                }
+            }
+        });
+
+        Button button3 = rootView.findViewById(R.id.button3);
+        button3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (callback != null){
+                    callback.onImageSelected(2);
+                }
+            }
+        });
+        return rootView;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof ImageSelectionCallback){
+            callback = (ImageSelectionCallback) context;
+        }
+    }
+
+}
+#+end_src
+** ViewerFragment.java
+#+begin_src java
+  public class ViewerFragment extends Fragment {
+    ImageView imageView;
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        ViewGroup rootView  = (ViewGroup) inflater.inflate(R.layout.fragment_viewer, container, false);
+        imageView = rootView.findViewById(R.id.imageView);
+        return rootView;
+    }
+    public void setImage(int resId){
+        imageView.setImageResource(resId);
+    }
+}
+#+end_src
+
+** activity_main.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <fragment
+            android:id="@+id/listFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:name="edu.smh.game.myfragment2_01.ListFragment"/>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <fragment
+            android:id="@+id/viewerFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:name="edu.smh.game.myfragment2_01.ViewerFragment"/>
+
+    </FrameLayout>
+</LinearLayout>
+#+end_src
+** fragment_list.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1st Image" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="2nd Image" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="3rd image" />
+</LinearLayout>
+#+end_src
+** fragment_viewer.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/dream01" />
+</LinearLayout>
+#+end_src
   
 
 * Activity
@@ -453,3 +630,5 @@ https://hyunjungchoi.tistory.com/76
   - 출처: https://webit22.tistory.com/73 [조약돌_마을:티스토리]
   - https://ideajini.tistory.com/15
 
+** Android dependency duplicate error - MyReceiver example
+https://stackoverflow.com/questions/44653261/android-dependency-has-different-version-for-the-compile-and-runtime

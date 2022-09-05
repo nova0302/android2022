@@ -1,0 +1,132 @@
+* Service
+
+** MainActivity.java
+#+begin_src java
+  public class MainActivity extends AppCompatActivity {
+    EditText editText;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        editText = findViewById(R.id.editText);
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String name = editText.getText().toString();
+
+                Intent intent = new Intent(getApplicationContext(), MyService.class);
+                intent.putExtra("command", "show");
+                intent.putExtra("name", name);
+                startService(intent);
+
+            }
+        });
+        Intent intent = getIntent();
+        processIntent(intent);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        processIntent(intent);
+    }
+
+    public void processIntent(Intent intent){
+        if (intent != null){
+            String command = intent.getStringExtra("command");
+            String name = intent.getStringExtra("name");
+
+            Toast.makeText(this, "command: " + command + ", name: " + name, Toast.LENGTH_SHORT).show();
+        }
+
+    }
+}
+#+end_src
+** MyService.java
+#+begin_src java
+  
+public class MyService extends Service {
+    private static final String TAG = "MyService";
+    public MyService() {
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "onCreate called!");
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand called!");
+        if (intent != null){
+            processCommand(intent);
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    public void processCommand(Intent intent){
+        String command = intent.getStringExtra("command");
+        String name = intent.getStringExtra("name");
+        Log.d(TAG, "command: " + command + ", name: " + name);
+        try{
+            Thread.sleep(5000);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        Intent showIntent = new Intent(getApplicationContext(), MainActivity.class);
+        showIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|
+                Intent.FLAG_ACTIVITY_SINGLE_TOP|
+                Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        showIntent.putExtra("command", "show");
+        showIntent.putExtra("name", name + " from service");
+        startActivity(showIntent);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy called!");
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+}
+#+end_src
+
+** activity_main.xml
+#+begin_src xml
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      tools:context=".MainActivity" >
+
+      <EditText
+	  android:id="@+id/editText"
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:ems="10"
+	  android:inputType="textPersonName" />
+
+      <Button
+	  android:id="@+id/button"
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:text="start service" />
+  </LinearLayout>
+#+end_src
+
+** screen shot
+
+#+CAPTION: Application Screen Shot
+#+NAME:   fig:SED-HR4049
+./images/service01.png
