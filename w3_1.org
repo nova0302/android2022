@@ -1,0 +1,190 @@
+* Service Exercise
+** main
+*** MainActivity.java
+#+begin_src java
+public class MainActivity extends AppCompatActivity {
+    EditText editText;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        editText = findViewById(R.id.editText);
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String name = editText.getText().toString();
+                Intent intent = new Intent(getApplicationContext(), MyService.class);
+                intent.putExtra("command", "show");
+                intent.putExtra("name", name);
+                startService(intent);
+            }
+        });
+        Button button2 = findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String userInput = editText.getText().toString();
+                int iUserInput = Integer.parseInt(userInput);
+                Intent intent = new Intent(getApplicationContext(), Power2Service.class);
+                intent.putExtra("userInput", iUserInput);
+                startService(intent);
+            }
+        });
+        Intent intent = getIntent();
+        processIntent(intent);
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        processIntent(intent);
+    }
+    public void processIntent(Intent intent){
+        if (intent != null){
+            String command = intent.getStringExtra("command");
+            if (command != null){
+                if (command.equals("show")){
+                    String name = intent.getStringExtra("name");
+                    Toast.makeText(this, "command " + command + ", name: " + name, Toast.LENGTH_SHORT).show();
+                }else if (command.equals("power")){
+                    int result = intent.getIntExtra("result", -1);
+                    if (result != -1){
+                        Toast.makeText(this, "result: " + result, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }
+    }
+} 
+#+end_src
+
+*** activity_main.xml
+#+begin_src xml
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="edu.smh.game.myservice_03">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyService_03"
+        tools:targetApi="31">
+        <service
+            android:name=".Power2Service"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service
+            android:name=".MyService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+#+end_src
+
+
+** MyService.java
+#+begin_src java
+  public class MyService extends Service {
+    private static final String TAG="MyService";
+    public MyService() {
+    }
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "onCreate called!");
+    }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand called!");
+        if (intent != null){
+            processCommand(intent);
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+    public void processCommand(Intent intent){
+        String command = intent.getStringExtra("command");
+        String name = intent.getStringExtra("name");
+        Log.d(TAG, "command: " + command + ", name: " + name);
+        try{
+            Thread.sleep(5000);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        Intent showIntent = new Intent(getApplicationContext(), MainActivity.class);
+        showIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|
+                Intent.FLAG_ACTIVITY_CLEAR_TOP|
+                Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        showIntent.putExtra("command", "show");
+        showIntent.putExtra("name", name + " from service!");
+        startActivity(showIntent);
+    }
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy called!");
+        super.onDestroy();
+    }
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+}
+#+end_src
+
+** Power2Service.java
+#+begin_src java
+public class Power2Service extends Service {
+    private static final String TAG = "Power2Service";
+    public Power2Service() {
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null){
+            processCommand(intent);
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+    public void processCommand(Intent intent){
+        int userInput = intent.getIntExtra("userInput", 3);
+        Intent showIntent = new Intent(getApplicationContext(), MainActivity.class);
+        showIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|
+                Intent.FLAG_ACTIVITY_CLEAR_TOP|
+                Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        showIntent.putExtra("command", "power");
+        showIntent.putExtra("result", userInput*userInput);
+        startActivity(showIntent);
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+}
+#+end_src
+
+* screen shot
+
+#+CAPTION: Application Screen Shot
+#+NAME:   fig:SED-HR4049
+[[./images/service01_exercise.png][screen capture for exercise]]
+
+
+** Broadcast Receiver

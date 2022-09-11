@@ -1,6 +1,8 @@
-* Service
+* Chapter 6. Service & Broadcastreceiver
 
-** MainActivity.java
+** Service
+
+*** MainActivity.java
 #+begin_src java
   public class MainActivity extends AppCompatActivity {
     EditText editText;
@@ -45,7 +47,7 @@
     }
 }
 #+end_src
-** MyService.java
+*** MyService.java
 #+begin_src java
   
 public class MyService extends Service {
@@ -100,7 +102,7 @@ public class MyService extends Service {
 }
 #+end_src
 
-** activity_main.xml
+*** activity_main.xml
 #+begin_src xml
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -125,8 +127,11 @@ public class MyService extends Service {
   </LinearLayout>
 #+end_src
 
-** screen shot
+*** screen shot
 
 #+CAPTION: Application Screen Shot
 #+NAME:   fig:SED-HR4049
 [[./images/service01.png]]
+
+
+** Broadcast Receiver

@@ -1,0 +1,140 @@
+* Intent & Activity & Parcelable
+** MainActivity
+*** MainActivity.java
+#+begin_src java
+  
+public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
+                SimpleData data = new SimpleData(200, "OK");
+                intent.putExtra("data", data);
+                startActivity(intent);
+            }
+        });
+    }
+}
+#+end_src
+*** activity_main.xml
+#+begin_src xml
+  <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Open Menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+#+end_src
+** MenuActivity
+*** MenuActivity.java
+#+begin_src java
+  
+public class MenuActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_menu);
+
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+        Intent intent = getIntent();
+        processIntent(intent);
+    }
+    public void processIntent(Intent intent){
+        if (intent != null){
+            Bundle bundle = intent.getExtras();
+            SimpleData data = bundle.getParcelable("data");
+            if (data != null){
+                Toast.makeText(this, "object received: " + "data.code: " + data.code + ", message: " + data.message, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+}
+#+end_src
+*** activity_menu.xml
+#+begin_src xml
+  <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MenuActivity">
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="go back to main"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+#+end_src
+
+** SimpleData.java
+#+begin_src java
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class SimpleData implements Parcelable {
+    int code;
+    String message;
+    public SimpleData(int code, String message){
+        this.code = code;
+        this.message =message;
+    }
+
+    protected SimpleData(Parcel in) {
+        code = in.readInt();
+        message = in.readString();
+    }
+
+    public static final Creator<SimpleData> CREATOR = new Creator<SimpleData>() {
+        @Override
+        public SimpleData createFromParcel(Parcel in) {
+            return new SimpleData(in);
+        }
+
+        @Override
+        public SimpleData[] newArray(int size) {
+            return new SimpleData[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(code);
+        parcel.writeString(message);
+    }
+}
+#+end_src
