@@ -184,7 +184,7 @@ public class Power2Service extends Service {
 
 #+CAPTION: Application Screen Shot
 #+NAME:   fig:SED-HR4049
-[[./images/service01_exercise.png][screen capture for exercise]]
+[[./images/service02.png]]
 
 
 ** Broadcast Receiver
