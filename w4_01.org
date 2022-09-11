@@ -1,0 +1,153 @@
+* BroadcastReceiver
+** MainActivity.java
+#+begin_src java
+  
+public class MainActivity extends AppCompatActivity implements AutoPermissionsListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        AutoPermissions.Companion.loadAllPermissions(this, 101);
+    }
+
+    @Override
+    public void onDenied(int requestCode, @NonNull String[] permissions) {
+        showToast("num of permissions denied: " + permissions.length);
+    }
+
+    @Override
+    public void onGranted(int requestCode, @NonNull String[] permissions) {
+        showToast("num of permissions granted: " + permissions.length);
+    }
+    public void showToast(String data){
+        Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        AutoPermissions.Companion.parsePermissions(this, requestCode, permissions, this);
+    }
+}
+#+end_src
+
+** SmsReceiver.java
+#+begin_src java
+  
+public class SmsReceiver extends BroadcastReceiver {
+    private static final String TAG = "SmsReceiver";
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "onReceive called!");
+        Bundle bundle = intent.getExtras();
+        SmsMessage[] messages = parseSmsMessage(bundle);
+        if (messages != null && messages.length > 0){
+            String sender = messages[0].getOriginatingAddress();
+            String contents = messages[0].getMessageBody();
+
+            Log.d(TAG, "sender: " + sender + ", contents: " +  contents);
+        }
+    }
+    private SmsMessage[] parseSmsMessage(Bundle bundle){
+        Object[] objs = (Object[]) bundle.get("pdus");
+        SmsMessage[] messages = new SmsMessage[objs.length];
+
+        int smsCount = objs.length;
+        for (int i=0; i<smsCount; i++){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                String format = bundle.getString("format");
+                messages[i] = SmsMessage.createFromPdu((byte[]) objs[i], format);
+            }else{
+                messages[i] = SmsMessage.createFromPdu((byte[]) objs[i]);
+            }
+        }
+        return messages;
+    }
+}
+#+end_src
+
+** AndroidManifest.xml
+
+#+begin_src xml
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="edu.smh.game.myreceiver_01">
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyReceiver_01"
+        tools:targetApi="31">
+        <receiver
+            android:name=".SmsReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+
+        </receiver>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+#+end_src
+
+** build.gradle
+#+begin_src gradle
+  ependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    
+    implementation 'com.github.pedroSG94:AutoPermissions:1.0.3'
+}
+#+end_src
+
+** settings.gradle
+#+begin_src gradle
+  dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
+}
+#+end_src
+** gradle.properties
+
+#+begin_src gradle
+# https://developer.android.com/topic/libraries/support-library/androidx-rn
+android.useAndroidX=true
+# Enables namespacing of each library's R class so that its R class includes only the
+# resources declared in the library itself and none from the library's dependencies,
+# thereby reducing the size of the R class for that library
+android.nonTransitiveRClass=true
+  
+android.enableJetifier=true
+#+end_src
+
+

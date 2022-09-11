@@ -1,0 +1,162 @@
+* BroadcastReceiver 2
+** MainActivity.java
+#+begin_src java
+  
+public class MainActivity extends AppCompatActivity implements AutoPermissionsListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        AutoPermissions.Companion.loadAllPermissions(this, 101);
+    }
+
+    @Override
+    public void onDenied(int requestCode, @NonNull String[] permissions) {
+        showToast("num of permissions denied: " + permissions.length);
+    }
+
+    @Override
+    public void onGranted(int requestCode, @NonNull String[] permissions) {
+        showToast("num of permissions granted: " + permissions.length);
+    }
+    public void showToast(String data){
+        Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        AutoPermissions.Companion.parsePermissions(this, requestCode, permissions, this);
+    }
+}
+#+end_src
+
+** SmsReceiver.java
+#+begin_src java
+  
+public class SmsReceiver extends BroadcastReceiver {
+    private static final String TAG = "SmsReceiver";
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "onReceive called!");
+        Bundle bundle = intent.getExtras();
+        SmsMessage[] messages = parseSmsMessage(bundle);
+        if (messages != null && messages.length > 0){
+            String sender = messages[0].getOriginatingAddress();
+            String contents = messages[0].getMessageBody();
+
+            Log.d(TAG, "sender: " + sender + ", contents: " +  contents);
+            sendToActivity(context, sender, contents);
+        }
+    }
+    public void sendToActivity(Context context, String sender, String contents ){
+        Intent intent = new Intent(context, SmsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|
+                Intent.FLAG_ACTIVITY_SINGLE_TOP|
+                Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("sender", sender);
+        intent.putExtra("contents", contents);
+        context.startActivity(intent);
+    }
+    private SmsMessage[] parseSmsMessage(Bundle bundle){
+        Object[] objs = (Object[]) bundle.get("pdus");
+        SmsMessage[] messages = new SmsMessage[objs.length];
+
+        int smsCount = objs.length;
+        for (int i=0; i<smsCount; i++){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                String format = bundle.getString("format");
+                messages[i] = SmsMessage.createFromPdu((byte[]) objs[i], format);
+            }else{
+                messages[i] = SmsMessage.createFromPdu((byte[]) objs[i]);
+            }
+        }
+        return messages;
+    }
+}
+#+end_src
+** SmsActivity.java
+#+begin_src java
+  
+public class SmsActivity extends AppCompatActivity {
+    TextView textView;
+    TextView textView2;
+    TextView textView3;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sms);
+
+        textView2 = findViewById(R.id.textView2);
+        textView3 = findViewById(R.id.textView3);
+
+        Intent intent = getIntent();
+        processIntent(intent);
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        processIntent(intent);
+    }
+
+    public void processIntent(Intent intent){
+        if (intent != null){
+            String sender = intent.getStringExtra("sender");
+            String contents = intent.getStringExtra("contents");
+
+            textView2.setText(sender);
+            textView3.setText(contents);
+        }
+
+    }
+}
+#+end_src
+** activity_sms.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:orientation="vertical"
+    tools:context=".SmsActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Message Received"
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="sender"
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="contents"
+        android:textSize="30sp" />
+
+</LinearLayout>
+#+end_src
+
+* screen shot
+
+#+CAPTION: Application Screen Shot
+#+NAME:   fig:SED-HR4049
+[[./images/broadcastReceiver.png]]
+
+
+** Broadcast Receiver
