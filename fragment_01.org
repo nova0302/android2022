@@ -1,0 +1,132 @@
+* fragment01
+
+** MainActivity
+*** MainActivity.java
+#+begin_src java
+public class MainActivity extends AppCompatActivity {
+    MainFragment mainFragment;
+    MenuFragment menuFragment;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mainFragment =(MainFragment) getSupportFragmentManager().findFragmentById(R.id.mainFragment);
+        menuFragment = new MenuFragment();
+    }
+
+    public void onFragmentChanged(int index){
+        if (index == 0){
+             getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+        }else if (index == 1){
+            getSupportFragmentManager().beginTransaction().replace(R.id.container, menuFragment).commit();
+        }
+    }
+}
+#+end_src
+*** activity_main.xml
+#+begin_src xml
+  <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity" >
+    <fragment
+        android:id="@+id/mainFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="edu.smh.game.myfragment_06.MainFragment"/>
+</FrameLayout>
+#+end_src
+
+** MainFragment
+*** MainFragment.java
+#+begin_src java
+ public class MainFragment extends Fragment {
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_main, container, false);
+        Button button = rootView.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity activity = (MainActivity) getActivity();
+                activity.onFragmentChanged(1);
+            }
+        });
+        return rootView;
+    }
+} 
+#+end_src
+*** fragment_main.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DAB1B1"
+    android:orientation="vertical"
+    tools:context=".MainFragment">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="main fragment"
+        android:textSize="50sp" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="switch view" />
+</LinearLayout>
+#+end_src
+** MenuFragment
+*** MenuFragment.java
+#+begin_src java
+ public class MenuFragment extends Fragment {
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_menu, container, false);
+        Button button = rootView.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity activity = (MainActivity) getActivity();
+                activity.onFragmentChanged(0);
+            }
+        });
+        return rootView;
+    }
+} 
+#+end_src
+*** fragment_menu.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#B2DAB4"
+    android:orientation="vertical"
+    tools:context=".MainFragment">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="menu fragment"
+        android:textSize="50sp" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="go to main" />
+</LinearLayout>
+#+end_src
