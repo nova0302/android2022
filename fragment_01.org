@@ -1,4 +1,8 @@
 * fragment01
+** main methods
+getSupportFragmentmanager().findFragmentById
+getSupportFragmentManager().beginTransaction().replace().commit()
+
 
 ** MainActivity
 *** MainActivity.java
