@@ -1,0 +1,142 @@
+* Layout
+** MainActivity
+*** MainActivity.java
+#+begin_src java
+  
+public class MainActivity extends AppCompatActivity {
+    Layout1 layout1;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        layout1 = findViewById(R.id.layout1);
+        layout1.setImage(R.drawable.ic_launcher_foreground);
+        layout1.setName("Peter");
+        layout1.setMobile("010-1000-10000");
+
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                layout1.setImage(R.drawable.profile1);
+            }
+        });
+    }
+}
+#+end_src
+
+*** activity_main.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="change image" />
+
+    <edu.smh.game.mylayout_02.Layout1
+        android:id="@+id/layout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"></edu.smh.game.mylayout_02.Layout1>
+</LinearLayout>
+#+end_src
+
+** Layout1
+*** Layout1.java
+#+begin_src java
+  public class Layout1 extends LinearLayout {
+    ImageView imageView;
+    TextView textView;
+    TextView textView2;
+
+    public Layout1(Context context) {
+        super(context);
+        init(context);
+    }
+
+    public Layout1(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public void init(Context context){
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(R.layout.layout1, this, true);
+
+        imageView = findViewById(R.id.imageView);
+        textView = findViewById(R.id.textView);
+        textView2 = findViewById(R.id.textView2);
+    }
+
+    public void setImage(int resId){
+        imageView.setImageResource(resId);
+    }
+
+    public void setName(String name){
+        textView.setText(name);
+    }
+
+    public void setMobile(String mobile ){
+        textView2.setText(mobile);
+    }
+}
+
+#+end_src
+
+*** layout1.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="5dp"
+        app:cardUseCompatPadding="true" >
+
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            app:srcCompat="@drawable/ic_launcher_foreground" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="name"
+                android:textSize="30sp" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="phone number"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+</LinearLayout>
+#+end_src

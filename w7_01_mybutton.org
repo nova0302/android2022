@@ -1,0 +1,85 @@
+* MyButton
+** MainActivity
+*** MainActivity.java
+#+begin_src java
+  public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+}
+#+end_src
+*** activity_main.xml
+#+begin_src xml
+  <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <edu.smh.game.myview_02.MyButton
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Check"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+#+end_src
+
+** MyButton
+*** MyButton.java
+#+begin_src java
+  public class MyButton extends AppCompatButton {
+    public MyButton(@NonNull Context context) {
+        super(context);
+        init(context);
+    }
+
+    public MyButton(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public void init(Context context){
+        setBackgroundColor(Color.CYAN);
+        setTextColor(Color.BLACK);
+
+        float textSize = getResources().getDimension(R.dimen.text_size);
+        setTextSize(textSize);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        Log.d("MyButton", "onDraw called!");
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Log.d("MyButton", "onTouchEvent called!");
+        int action = event.getAction();
+        switch (action){
+            case MotionEvent.ACTION_DOWN:
+                setBackgroundColor(Color.BLUE);
+                setTextColor(Color.RED);
+                break;
+            case MotionEvent.ACTION_OUTSIDE:
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                setBackgroundColor(Color.CYAN);
+                setTextColor(Color.BLACK);
+                break;
+        }
+        invalidate();
+        return true;
+    }
+}
+#+end_src
+
+
