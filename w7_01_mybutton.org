@@ -82,4 +82,11 @@
 }
 #+end_src
 
+** dimens.xml
+#+begin_src xml
+  <resources>
+    <dimen name="text_size">10sp</dimen>
+</resources>
+#+end_src
+
 
