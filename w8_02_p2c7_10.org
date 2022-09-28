@@ -1,0 +1,64 @@
+* spinner
+** MainActivity.java
+#+begin_src java
+  
+  public class MainActivity extends AppCompatActivity {
+
+      TextView textView;
+      String [] items = {"Peter", "Danny", "John"};
+
+
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+	  super.onCreate(savedInstanceState);
+	  setContentView(R.layout.activity_main);
+
+	  textView = findViewById(R.id.textView);
+
+	  Spinner spinner = findViewById(R.id.spinner);
+	  ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+		  this,
+		  android.R.layout.simple_spinner_item,
+		  items
+	  );
+	  adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	  spinner.setAdapter(adapter);
+
+	  spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+	      @Override
+	      public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+		  textView.setText(items[i]);
+	      }
+	      @Override
+	      public void onNothingSelected(AdapterView<?> adapterView) {
+		  textView.setText("");
+	      }
+	  });
+      }
+  }
+#+end_src
+
+** activity_main.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Selected Item"
+        android:textAlignment="center"
+        android:textSize="24sp" />
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
+#+end_src
