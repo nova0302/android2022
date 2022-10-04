@@ -159,4 +159,3 @@ public class SmsActivity extends AppCompatActivity {
 [[./images/broadcastReceiver.png]]
 
 
-** Broadcast Receiver

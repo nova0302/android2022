@@ -632,3 +632,9 @@ https://hyunjungchoi.tistory.com/76
 
 ** Android dependency duplicate error - MyReceiver example
 https://stackoverflow.com/questions/44653261/android-dependency-has-different-version-for-the-compile-and-runtime
+
+** java class template?(generic types)
+https://docs.oracle.com/javase/tutorial/java/generics/types.html
+
+** java static netsted class
+https://www.geeksforgeeks.org/static-class-in-java/
