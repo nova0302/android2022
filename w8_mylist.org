@@ -1,0 +1,234 @@
+* MyList
+** Person.java
+#+begin_src java
+public class Person {
+    String name, mobile;
+
+    public Person(String name, String mobile) {
+        this.name = name;
+        this.mobile = mobile;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+}
+#+end_src
+
+** PersonAdapter.java
+#+begin_src java
+  
+public class PersonAdapter extends RecyclerView.Adapter<PersonAdapter.ViewHolder>{
+    ArrayList<Person> items = new ArrayList<Person>();
+    //OnPersonItemClickListener listener;
+    public void addItem(Person p){
+        items.add(p);
+    }
+    public void setItems(ArrayList<Person> items){
+        this.items = items;
+    }
+    public void setItem(int position, Person item){
+        items.set(position, item);
+    }
+    public Person getItem(int position){
+        return items.get(position);
+    }
+    /*
+    public void setOnItemClickListener(OnPersonItemClickListener listener){
+        this.listener = listener;
+    }
+     */
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        View itemView = inflater.inflate(R.layout.person_item, parent, false);
+        return new ViewHolder(itemView);
+        //return new ViewHolder(itemView, listener);
+    }
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Person item = items.get(position);
+        holder.setItem(item);
+    }
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+    static class ViewHolder extends RecyclerView.ViewHolder{
+        TextView textView;
+        TextView textView2;
+        //public ViewHolder(@NonNull View itemView, final OnPersonItemClickListener listener) {
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            textView = itemView.findViewById(R.id.textView);
+            textView2 = itemView.findViewById(R.id.textView2);
+           /*
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int position = getAdapterPosition();
+                    if (listener != null){
+                        listener.onItemClick(ViewHolder.this, view, position);
+                    }
+                }
+            });
+            */
+        }
+        public void setItem(Person person){
+            textView.setText(person.getName());
+            textView2.setText(person.getMobile());
+        }
+    }
+}
+
+#+end_src
+
+** MainActivity.java
+#+begin_src java
+  
+  public class MainActivity extends AppCompatActivity {
+      PersonAdapter adapter;
+
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+	  super.onCreate(savedInstanceState);
+	  setContentView(R.layout.activity_main);
+
+	  RecyclerView recyclerView = findViewById(R.id.recyclerView);
+
+	  LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+	  //GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+
+	  recyclerView.setLayoutManager(layoutManager);
+
+	  adapter = new PersonAdapter();
+
+	  adapter.addItem(new Person("Peter", "010-1000-1000"));
+	  adapter.addItem(new Person("Danny", "010-2000-1000"));
+	  adapter.addItem(new Person("John", "010-3000-1000"));
+
+	  recyclerView.setAdapter(adapter);
+
+	  /*
+	  adapter.setOnItemClickListener(new OnPersonItemClickListener() {
+	      @Override
+	      public void onItemClick(PersonAdapter.ViewHolder holder, View view, int position) {
+		  Person p = adapter.getItem(position);
+		  showToast("Selected Item: " + p.getName());
+	      }
+	  });
+	   ,*/
+      }
+      public void showToast(String data){
+	  Toast.makeText(this, data, Toast.LENGTH_SHORT).show();
+      }
+  }
+
+#+end_src
+
+** person_item.xml
+#+begin_src xml
+ 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="5dp"
+        app:cardUseCompatPadding="true" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                app:srcCompat="@drawable/ic_launcher_foreground" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="name"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="mobile"
+                    android:textSize="20sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout> 
+
+#+end_src
+
+** activity_main.xml
+#+begin_src xml
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="20221004_Peter_221012"
+        android:textAlignment="center"
+        android:textSize="28sp" />
+</LinearLayout>
+
+#+end_src
+
+
+* screen shot
+
+#+CAPTION: Application Screen Shot
+#+NAME:   fig:SED-HR4049
+[[./images/w8_mylist.png]]
+

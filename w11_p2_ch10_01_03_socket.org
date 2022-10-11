@@ -1,0 +1,205 @@
+* Socket Communication
+** MainActivity.java
+#+begin_src java
+  
+public class MainActivity extends AppCompatActivity {
+    EditText input1;
+    TextView output1;
+    Handler handler = new Handler();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        input1 = findViewById(R.id.input1);
+        output1 = findViewById(R.id.output1);
+
+        Button sendButton = findViewById(R.id.sendButton);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final String  data = input1.getText().toString();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        send(data);
+                    }
+                }).start();
+            }
+        });
+        Button startServerButton = findViewById(R.id.startServerButton);
+        startServerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        startServer();
+                    }
+                }).start();
+            }
+        });
+    }
+    public void startServer(){
+        int port = 5001;
+        try {
+            ServerSocket server = new ServerSocket(port);
+            while (true){
+                Socket socket = server.accept();
+                InetAddress clientHost = socket.getLocalAddress();
+                int clientPort = socket.getPort();
+                println("Client Connection Established : " + clientHost + ", " + clientPort);
+
+                ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream())  ;
+                String input = (String) inStream.readObject();
+                println("data received: " + input);
+
+                ObjectOutputStream outstream = new ObjectOutputStream(socket.getOutputStream());
+                outstream.writeObject(input + " from server.");
+                outstream.flush();
+                println("data sent !");
+                socket.close();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void println(final String data){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                output1.append((data + "\n"));
+            }
+        });
+    }
+    public void send(String data){
+        int port = 5001;
+        try {
+            Socket socket = new Socket("localhost", port);
+            ObjectOutputStream outstream = new ObjectOutputStream(socket.getOutputStream());
+            outstream.writeObject(data);
+            outstream.flush();
+
+            ObjectInputStream instream = new ObjectInputStream(socket.getInputStream());
+            String input = (String) instream.readObject();
+            socket.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+#+end_src
+
+** activity_main.xml
+#+begin_src xml
+  
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#E1BABA"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="client"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/input1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName" />
+
+        <Button
+            android:id="@+id/sendButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="send" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#D7E8D8"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="server"
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/startServerButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Start Server" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/output1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="20sp" />
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+</LinearLayout>
+#+end_src
+
+** AndroidManifest.xml
+#+begin_src xml
+  
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      package="edu.smh.game.mysocket">
+    
+      <uses-permission android:name="android.permission.INTERNET"/>
+
+      <application
+	  android:allowBackup="true"
+	  android:dataExtractionRules="@xml/data_extraction_rules"
+	  android:fullBackupContent="@xml/backup_rules"
+	  android:icon="@mipmap/ic_launcher"
+	  android:label="@string/app_name"
+	  android:roundIcon="@mipmap/ic_launcher_round"
+	  android:supportsRtl="true"
+	  android:theme="@style/Theme.MySocket"
+	  tools:targetApi="31">
+	  <activity
+	      android:name=".MainActivity"
+	      android:exported="true">
+	      <intent-filter>
+		  <action android:name="android.intent.action.MAIN" />
+
+		  <category android:name="android.intent.category.LAUNCHER" />
+	      </intent-filter>
+	  </activity>
+      </application>
+
+  </manifest>
+
+#+end_src
