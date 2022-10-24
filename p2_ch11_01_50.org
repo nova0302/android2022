@@ -1,0 +1,286 @@
+* chapter 11 Database & Content Provider
+** Database
+*** MainActivity.java
+#+begin_src java
+  
+public class MainActivity extends AppCompatActivity {
+    EditText editText;
+    EditText editText2;
+    TextView textView;
+
+    SQLiteDatabase database;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        editText = findViewById(R.id.editText);
+        editText2 = findViewById(R.id.editText2);
+        textView = findViewById(R.id.textView);
+
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String dbName = editText.getText().toString();
+                createDatabase(dbName);
+
+            }
+        });
+
+        Button button2 = findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String tableName = editText2.getText().toString();
+                createTable(tableName);
+            }
+        });
+
+        Button button3 = findViewById(R.id.button3);
+        button3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                insertRecord();
+            }
+        });
+
+        Button button4 = findViewById(R.id.button4);
+        button4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dropTable();
+            }
+        });
+
+        Button button5 = findViewById(R.id.button5);
+        button5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                executeQuery();
+            }
+        });
+    }
+    public void executeQuery(){
+        println("executeQuery called!");
+        if (database == null){
+            println("Enter open database first!");
+            return;
+        }
+        String tableName = editText2.getText().toString();
+        if (tableName == null){
+            println("Enter table name!");
+            return;
+        }
+        try {
+            String sql = "select _id, name, age, mobile from " + tableName;
+            Cursor cursor = database.rawQuery(sql, null);
+            /*
+            int recordCount = cursor.getCount();
+            for (int i = 0; i < recordCount; i++){
+                cursor.moveToNext();
+                int id  = cursor.getInt(0);
+                String name = cursor.getString(1);
+                int age  = cursor.getInt(2);
+                String mobile = cursor.getString(3);
+                println("record #" + i + " : " + id + ",  " + name + ", " + age + ", " + mobile);
+            }
+             */
+            while (cursor.moveToNext()){
+                int id  = cursor.getInt(0);
+                String name = cursor.getString(1);
+                int age  = cursor.getInt(2);
+                String mobile = cursor.getString(3);
+                println("record #" + id + ",  " + name + ", " + age + ", " + mobile);
+            }
+            cursor.close();;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void dropTable(){
+        println("dropTable called!");
+        if (database == null){
+            println("database is not open, please open first!!!");
+            return;
+        }
+        String tableName = editText2.getText().toString();
+        if (tableName == null){
+            println("please, enter table name!");
+            return;
+        }
+        try {
+            String sql = "drop table " + tableName;
+            database.execSQL(sql);
+            println("dropped table : " + tableName);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void insertRecord(){
+        println("insertRecord called!");
+        if (database == null){
+            println("database is not open, please open first!!!");
+            return;
+        }
+        String tableName = editText2.getText().toString();
+        if (tableName == null){
+            println("please, enter table name!");
+            return;
+        }
+        try {
+            String sql = "insert into " + tableName + "(name, age, mobile) values('jonh', 20, '010-1000-1004')";
+            database.execSQL(sql);
+            println("redord is inserted!!!");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void createTable(String tableName){
+        println("createTable called!");
+        try {
+            if (database == null){
+                println("database is no open, open data please!");
+                return;
+            }
+            String  sql = "create table if not exists " +
+                    tableName +
+                    "(_id integer PRIMARY KEY autoincrement, name text, age integer, mobile text)";
+            database.execSQL(sql);
+            println("table created: " + tableName);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void createDatabase(String dbName){
+        println("createDatabase called!");
+        try {
+            database =  openOrCreateDatabase(dbName, MODE_PRIVATE, null);
+            println("database created: " + dbName);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void println(String data){
+        textView.append(data + "\n");
+    }
+}
+
+#+end_src
+
+*** activity_main.xml
+#+begin_src xml
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="textPersonName" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Create database" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editText2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="textPersonName" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="create table" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="drop table" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_weight="1"
+            android:text="add record" />
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_weight="1"
+            android:text="select" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
+
+  
+#+end_src
+
+
+
+* screen shot
+
+#+CAPTION: Application Screen Shot
+#+NAME:   fig:SED-HR4049
+[[./images/database.png]]
+
+
+
+** Content Provider
