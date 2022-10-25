@@ -1,0 +1,115 @@
+* animation
+** scale
+*** MainActivity.java
+#+begin_src java
+
+  public class MainActivity extends AppCompatActivity {
+
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+	  super.onCreate(savedInstanceState);
+	  setContentView(R.layout.activity_main);
+	  Button button = findViewById(R.id.button);
+	  button.setOnClickListener(new View.OnClickListener() {
+		  @Override
+		  public void onClick(View view) {
+		      Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale);
+		      view.startAnimation(anim);
+		  }
+	      });
+
+	  Button button2 = findViewById(R.id.button2);
+	  button2.setOnClickListener(new View.OnClickListener() {
+		  @Override
+		  public void onClick(View view) {
+		      Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale2);
+		      view.startAnimation(anim);
+		  }
+	      });
+      }
+  }
+#+end_src
+
+*** activity_main.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		xmlns:app="http://schemas.android.com/apk/res-auto"
+		xmlns:tools="http://schemas.android.com/tools"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		tools:context=".MainActivity">
+
+    <Button
+	android:id="@+id/button"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_gravity="center_horizontal"
+	android:text="zoom in" />
+
+    <Button
+	android:id="@+id/button2"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_gravity="center_horizontal"
+	android:text="zoom in2" />
+
+  </LinearLayout>
+#+end_src
+
+*** scale.xml
+#+begin_src xml
+
+  <set xmlns:android="http://schemas.android.com/apk/res/android">
+    <scale
+	android:duration="2500"
+	android:pivotY="50%"
+	android:pivotX="50%"
+	android:fromXScale="1.0"
+	android:fromYScale="1.0"
+	android:toXScale="2.0"
+	android:toYScale="2.0"
+	/>
+
+  </set>
+
+#+end_src
+
+*** scale2.xml
+#+begin_src xml
+  
+  <set xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <scale
+	android:duration="2500"
+	android:pivotY="50%"
+	android:pivotX="50%"
+	android:fromXScale="1.0"
+	android:fromYScale="1.0"
+	android:toXScale="2.0"
+	android:toYScale="2.0"
+	/>
+
+    <scale
+	android:startOffset="2500"
+	android:duration="2500"
+	android:pivotY="50%"
+	android:pivotX="50%"
+	android:fromXScale="1.0"
+	android:fromYScale="1.0"
+	android:toXScale="0.5"
+	android:toYScale="0.5"
+	/>
+  </set>
+#+end_src
+
+
+* screen shot
+
+#+CAPTION: Application Screen Shot
+#+NAME:   fig:SED-HR4049
+[[./images/anim.png]]
+
+
+
+** Content Provider
