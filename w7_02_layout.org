@@ -146,6 +146,6 @@ public class MainActivity extends AppCompatActivity {
 
 #+CAPTION: Application Screen Shot
 #+NAME:   fig:SED-HR4049
-[[./images/profile1.png]]
+[[./images/layout1.png]]
 
 
