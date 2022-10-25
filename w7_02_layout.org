@@ -140,3 +140,12 @@ public class MainActivity extends AppCompatActivity {
     </androidx.cardview.widget.CardView>
 </LinearLayout>
 #+end_src
+
+
+* screen shot
+
+#+CAPTION: Application Screen Shot
+#+NAME:   fig:SED-HR4049
+[[./images/profile1.png]]
+
+
