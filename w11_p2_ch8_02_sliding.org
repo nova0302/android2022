@@ -1,0 +1,131 @@
+* MySliding
+
+** MainActivity.java
+#+begin_src java
+  public class MainActivity extends AppCompatActivity {
+      Animation translateLeftAnim;
+      Animation translateRightAnim;
+      LinearLayout page;
+      Button button;
+
+      boolean isPageOpen = false;
+
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+	  super.onCreate(savedInstanceState);
+	  setContentView(R.layout.activity_main);
+
+	  page = findViewById(R.id.page);
+
+	  translateLeftAnim = AnimationUtils.loadAnimation(this, R.anim.translate_left);
+	  translateRightAnim = AnimationUtils.loadAnimation(this, R.anim.translate_right);
+	  SlidingAnimationListener animListtener = new SlidingAnimationListener();
+	  translateRightAnim.setAnimationListener(animListtener);
+	  translateLeftAnim.setAnimationListener(animListtener);
+
+	  button = findViewById(R.id.button);
+	  button.setOnClickListener(new View.OnClickListener() {
+		  @Override
+		  public void onClick(View view) {
+		      if (isPageOpen){
+			  page.startAnimation(translateRightAnim);
+		      }else{
+			  page.setVisibility(View.VISIBLE);
+			  page.startAnimation(translateLeftAnim);
+		      }
+		  }
+	      });
+
+      }
+      class SlidingAnimationListener implements Animation.AnimationListener{
+
+	  @Override
+	  public void onAnimationStart(Animation animation) {
+
+	  }
+
+	  @Override
+	  public void onAnimationEnd(Animation animation) {
+	      if (isPageOpen){
+		  page.setVisibility(View.INVISIBLE);
+		  button.setText("Open");
+		  isPageOpen = false;
+	      }else{
+		  button.setText("Close");
+		  isPageOpen = true;
+	      }
+	  }
+
+	  @Override
+	  public void onAnimationRepeat(Animation animation) {
+
+	  }
+      }
+  }
+#+end_src
+
+** activity_main.xml
+#+begin_src xml
+  <?xml version="1.0" encoding="utf-8"?>
+  <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	       xmlns:app="http://schemas.android.com/apk/res-auto"
+	       xmlns:tools="http://schemas.android.com/tools"
+	       android:layout_width="match_parent"
+	       android:layout_height="match_parent"
+	       tools:context=".MainActivity" >
+
+    <LinearLayout
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="#5555FF"
+	android:orientation="vertical"></LinearLayout>
+
+    <LinearLayout
+	android:id="@+id/page"
+	android:layout_width="200dp"
+	android:layout_height="match_parent"
+	android:layout_gravity="right"
+	android:background="#FFFF66"
+	android:orientation="vertical"
+	android:visibility="gone"></LinearLayout>
+
+    <Button
+	android:id="@+id/button"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_gravity="right|center_vertical"
+	android:text="open" />
+  </FrameLayout>
+#+end_src
+
+** translate_left.xml
+#+begin_src xml
+  <?xml version="1.0" encoding="utf-8"?>
+  <set xmlns:android="http://schemas.android.com/apk/res/android"
+       android:interpolator = "@android:anim/accelerate_decelerate_interpolator">
+
+    <translate
+	android:fromXDelta="100%p"
+	android:toXDelta="0%p"
+	android:duration="500"
+	android:repeatCount ="0"
+	android:fillAfter="true"/>
+
+  </set>
+#+end_src
+
+** translate_right.xml
+#+begin_src xml
+  <?xml version="1.0" encoding="utf-8"?>
+  <set xmlns:android="http://schemas.android.com/apk/res/android"
+       android:interpolator = "@android:anim/accelerate_decelerate_interpolator">
+
+    <translate
+	android:fromXDelta="0%p"
+	android:toXDelta="100%p"
+	android:duration="500"
+	android:repeatCount ="0"
+	android:fillAfter="true"/>
+
+  </set>
+#+end_src
