@@ -1,0 +1,99 @@
+* MyWeb
+** MainActivity.java
+#+begin_src java
+  
+  public class MainActivity extends AppCompatActivity {
+      EditText editText;
+      WebView webView;
+
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+	  super.onCreate(savedInstanceState);
+	  setContentView(R.layout.activity_main);
+
+	  editText = findViewById(R.id.editText);
+	  webView = findViewById(R.id.webView);
+
+	  webView.setWebViewClient(new WebViewClient(){
+	      @Override
+	      public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+		  view.loadUrl(request.getUrl().toString());
+		  return true;
+	      }
+	  });
+	  Button button = findViewById(R.id.button);
+	  button.setOnClickListener(new View.OnClickListener() {
+	      @Override
+	      public void onClick(View view) {
+		  webView.loadUrl(editText.getText().toString());
+	      }
+	  });
+      }
+  }
+
+#+end_src
+
+** activity_main.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="http://m.naver.com" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="opne the web page" />
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>
+#+end_src
+
+** AndroidManifest.xml
+
+#+begin_src xml
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="edu.smh.game.myweb">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application
+        android:usesCleartextTraffic="true"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyWeb"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+#+end_src
