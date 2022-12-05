@@ -1,0 +1,125 @@
+* MyThread
+
+** MainActivity.java
+#+begin_src java
+  public class MainActivity extends AppCompatActivity {
+      TextView textView;
+      BackgroundThread oneSec;
+      BackgroundThread twoSec;
+      //MainHandler handler;
+
+      ProgressBar progressBar;
+      ProgressBar progressBar2;
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+	  super.onCreate(savedInstanceState);
+	  setContentView(R.layout.activity_main);
+
+	  progressBar = findViewById(R.id.progressBar);
+	  progressBar2 = findViewById(R.id.progressBar2);
+
+	  //handler = new MainHandler();
+	  textView = findViewById(R.id.textView);
+	  Button button = findViewById(R.id.button);
+	  button.setOnClickListener(new View.OnClickListener() {
+		  @Override
+		  public void onClick(View view) {
+		      if (oneSec == null){
+			  oneSec = new BackgroundThread("one", 500, progressBar);
+			  oneSec.start();
+		      }
+		      if (twoSec == null){
+			  twoSec = new BackgroundThread("two", 1000, progressBar2);
+			  twoSec.start();
+		      }
+		  }
+	      });
+      }
+      class BackgroundThread extends Thread{
+	  int value = 0;
+	  int delay = 1000;
+	  ProgressBar progressBar;
+	  String name;
+	  public BackgroundThread(String  name, int delay, ProgressBar progressBar ) {
+	      this.name = name;
+	      this.delay = delay;
+	      this.progressBar = progressBar;
+	  }
+	  public void setDelay(int delay){
+	      this.delay = delay;
+	  }
+	  public void run(){
+	      while (true){
+		  if (++value > 100){
+		      value = 0;
+		  }
+		  progressBar.setProgress(value);
+		  try {
+		      Thread.sleep(delay);
+		  }catch (Exception e){}
+		  value++;
+		  Log.d("MyThread", name + " - value: " + value);
+		  //textView.setText("value: " + value);
+		  /*
+		    Message message = handler.obtainMessage();
+		    Bundle bundle = new Bundle();
+		    bundle.putInt("value", value);
+		    message.setData(bundle);
+		    handler.sendMessage(message);
+		  ,*/
+	      }
+	  }
+      }
+      /*
+	class MainHandler extends Handler{
+	@Override
+	public void handleMessage(@NonNull Message msg) {
+	super.handleMessage(msg);
+	Bundle bundle = msg.getData();
+	int value = bundle.getInt("value");
+	textView.setText("value: " + value);
+	}
+	}
+      ,*/
+  }
+#+end_src
+
+** activity_main.xml
+#+begin_src xml
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="248dp"
+        android:text="start thread" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30sp" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <ProgressBar
+        android:id="@+id/progressBar2"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>
+#+end_src
