@@ -638,3 +638,13 @@ https://docs.oracle.com/javase/tutorial/java/generics/types.html
 
 ** java static netsted class
 https://www.geeksforgeeks.org/static-class-in-java/
+
+* [[https://velog.io/@haero_kim/Android-AsyncTask-%EA%B0%80-%EB%96%A0%EB%82%98%EA%B0%84-%EC%9D%B4%EC%9C%A0][AsyncTask Deprecated!!]]
+
+* [[https://velog.io/@cgotjh/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC-OSI-7-%EA%B3%84%EC%B8%B5-OSI-7-LAYER-%EA%B8%B0%EB%B3%B8-%EA%B0%9C%EB%85%90-%EA%B0%81-%EA%B3%84%EC%B8%B5-%EC%84%A4%EB%AA%85][osi 7 layer 1]]
+
+* [[https://shlee0882.tistory.com/110][osi 7 layer 2]]
+
+김상래
+규보시스템
+연구소
