@@ -269,11 +269,8 @@ public class MainActivity extends AppCompatActivity {
     </ScrollView>
 
 </LinearLayout>
-
   
 #+end_src
-
-
 
 * screen shot
 
@@ -282,4 +279,4 @@ public class MainActivity extends AppCompatActivity {
 [[./images/database.png]]
 
 
-
+* [[https://sqlitebrowser.org/][sqlite browser]]
