@@ -203,3 +203,25 @@ public class MainActivity extends AppCompatActivity {
   </manifest>
 
 #+end_src
+
+* Extra Application
+#+begin_src java
+    public void println(final String data){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                output1.append(data + '\n');
+                switch(state){
+                    case 0:
+                        startServerButton.setBackgroundColor(Color.RED);
+                        break;
+                    case 1:
+                        startServerButton.setBackgroundColor(Color.GREEN);
+                        break;
+                }
+                state++;
+                state %= 2;
+            }
+        });
+    }
+#+end_src
