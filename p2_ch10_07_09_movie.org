@@ -267,6 +267,16 @@ public class MovieListResult {
 }
 #+end_src
 
+** MovieList.java
+#+begin_src java
+  package edu.smh.game.myvolley;
+
+  public class MovieList {
+      MovieListResult boxOfficeResult;
+  }
+
+#+end_src
+
 ** build.gradle
 #+begin_src xml
   plugins {
